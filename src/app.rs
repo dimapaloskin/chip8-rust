@@ -29,10 +29,14 @@ pub struct App<'window> {
 
 impl App<'_> {
     pub fn new(vm: Vm, settings: Arc<RwLock<Settings>>) -> Self {
-        let beep_freq = { settings.read().unwrap().beep_freq };
+        let (beep_freq, scale) = {
+            let settings = settings.read().unwrap();
+            (settings.beep_freq, settings.scale_mode)
+        };
 
         let mut beeper = Beeper::new();
         _ = beeper.init_stream();
+        beeper.set_scale_mode(scale);
         beeper.set_freq(beep_freq);
 
         Self {
@@ -89,19 +93,29 @@ impl ApplicationHandler for App<'_> {
         match event {
             WindowEvent::RedrawRequested => {
                 if let (Some(window), Some(wgpu_ctx)) = (&self.window, self.wgpu_ctx.as_mut()) {
-                    let (ticks_per_frame, show_settings, beep_freqency, window_has_shadow) = {
+                    let (
+                        ticks_per_frame,
+                        show_settings,
+                        beep_freqency,
+                        window_has_shadow,
+                        scale_mode,
+                    ) = {
                         let settings = self.settings.read().unwrap();
                         (
                             settings.ticks_per_frame,
                             settings.show_settings,
                             settings.beep_freq,
                             settings.window_has_shadow,
+                            settings.scale_mode,
                         )
                     };
 
                     window.set_has_shadow(window_has_shadow);
 
-                    self.beeper.set_freq(beep_freqency);
+                    self.beeper.set_scale_mode(scale_mode);
+                    if !scale_mode {
+                        self.beeper.set_freq(beep_freqency);
+                    }
 
                     if !show_settings {
                         for _ in 0..ticks_per_frame {
@@ -162,8 +176,6 @@ impl ApplicationHandler for App<'_> {
                 if key_num.is_none() {
                     return;
                 }
-
-                // println!("{} is {:?}", key_num.unwrap(), event.state);
 
                 self.vm
                     .set_kb(key_num.unwrap(), event.state == ElementState::Pressed);

@@ -12,6 +12,7 @@ pub struct Ui {
 
     ticks_per_frame: u32,
     beep_freqency: f32,
+    scale_mode: bool,
 
     pp_enabled: bool,
     sepia_amount: f32,
@@ -26,6 +27,7 @@ impl Ui {
             bg_color,
             ticks_per_frame,
             beep_freqency,
+            scale_mode,
             window_has_shadow,
             pp_enabled,
             sepia_amount,
@@ -37,6 +39,7 @@ impl Ui {
                 settings.bg_color,
                 settings.ticks_per_frame,
                 settings.beep_freq,
+                settings.scale_mode,
                 settings.window_has_shadow,
                 settings.pp_enabled,
                 settings.sepia_amount,
@@ -50,6 +53,7 @@ impl Ui {
             window_has_shadow,
             ticks_per_frame,
             beep_freqency,
+            scale_mode,
             pp_enabled,
             sepia_amount,
             dirty: false,
@@ -101,12 +105,17 @@ impl Ui {
                 ui.vertical(|ui| {
                     ui.label("Beep frequency");
                     self.dirty |= ui
-                        .add(
+                        .add_enabled(
+                            !self.scale_mode,
                             egui::Slider::new(&mut self.beep_freqency, 55.0..=880.0)
                                 .show_value(true),
                         )
                         .changed();
                 });
+                ui.add_space(5.0);
+                self.dirty |= ui
+                    .checkbox(&mut self.scale_mode, "Major-scale mode")
+                    .changed();
 
                 ui.add_space(20.0);
                 self.dirty |= ui
@@ -138,5 +147,6 @@ impl Ui {
         settings.window_has_shadow = self.window_has_shadow;
         settings.pp_enabled = self.pp_enabled;
         settings.sepia_amount = self.sepia_amount;
+        settings.scale_mode = self.scale_mode;
     }
 }

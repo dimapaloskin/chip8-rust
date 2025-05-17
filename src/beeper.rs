@@ -1,4 +1,5 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use rand::seq::IndexedRandom;
 use std::{
     f32,
     sync::{
@@ -14,7 +15,26 @@ pub struct Beeper {
     sample_rate: f32,
     playing: Arc<AtomicBool>,
     reset_phase: Arc<AtomicBool>,
+    scale_mode: bool,
 }
+
+const MAJOR_SCALE: [f32; 15] = [
+    130.81, // C3
+    146.83, // D3
+    164.81, // E3
+    174.61, // F3
+    196.0,  // G3
+    220.0,  // A3
+    246.94, // B3
+    261.63, // C4
+    293.66, // D4
+    329.63, // E4
+    349.23, // F4
+    392.00, // G4
+    440.00, // A4
+    493.88, // B4
+    523.25, // C5
+];
 
 impl Beeper {
     #[allow(clippy::new_without_default)]
@@ -26,6 +46,7 @@ impl Beeper {
             sample_rate: 0.0,
             playing: Arc::new(AtomicBool::new(false)),
             reset_phase: Arc::new(AtomicBool::new(false)),
+            scale_mode: false,
         }
     }
 
@@ -118,6 +139,17 @@ impl Beeper {
             return;
         }
 
+        if self.scale_mode {
+            let mut rng = rand::rng();
+            let freq = MAJOR_SCALE.choose(&mut rng);
+            if let Some(freq) = freq {
+                let new_phase_inc = f32::consts::TAU * freq / self.sample_rate;
+                self.phase_inc
+                    .store(f32::to_bits(new_phase_inc), Ordering::Relaxed);
+                self.set_freq(*freq);
+            }
+        }
+
         self.reset_phase.store(true, Ordering::Relaxed);
         self.playing.store(true, Ordering::Relaxed);
     }
@@ -135,5 +167,9 @@ impl Beeper {
         let new_phase_inc = f32::consts::TAU * freq / self.sample_rate;
         self.phase_inc
             .store(f32::to_bits(new_phase_inc), Ordering::Relaxed);
+    }
+
+    pub fn set_scale_mode(&mut self, scale_mode: bool) {
+        self.scale_mode = scale_mode;
     }
 }

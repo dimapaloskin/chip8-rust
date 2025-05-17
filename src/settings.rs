@@ -9,6 +9,7 @@ pub struct Settings {
     pub ticks_per_frame: u32,
 
     pub beep_freq: f32,
+    pub scale_mode: bool,
 
     pub pp_enabled: bool,
     pub sepia_amount: f32,
@@ -25,6 +26,7 @@ impl Settings {
 
             ticks_per_frame: 10,
             beep_freq: 220.0,
+            scale_mode: true,
 
             pp_enabled: true,
             sepia_amount: 0.5,
