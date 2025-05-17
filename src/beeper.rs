@@ -143,9 +143,6 @@ impl Beeper {
             let mut rng = rand::rng();
             let freq = MAJOR_SCALE.choose(&mut rng);
             if let Some(freq) = freq {
-                let new_phase_inc = f32::consts::TAU * freq / self.sample_rate;
-                self.phase_inc
-                    .store(f32::to_bits(new_phase_inc), Ordering::Relaxed);
                 self.set_freq(*freq);
             }
         }
