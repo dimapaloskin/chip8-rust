@@ -1,0 +1,17 @@
+[package]
+name = "chip8"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bytemuck = { version = "1.23.0", features = ["derive"] }
+clap = { version = "4.5.38", features = ["derive"] }
+cpal = "0.15.3"
+egui = "0.31.1"
+egui-wgpu = { version = "0.31.1", features = ["winit"] }
+egui-winit = "0.31.1"
+lazy_static = "1.5.0"
+pollster = "0.4.0"
+rand = "0.9.1"
+wgpu = "24.0.0"
+winit = "0.30.10"
