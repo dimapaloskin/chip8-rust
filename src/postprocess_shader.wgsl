@@ -47,19 +47,19 @@ fn broken_display(col: vec4f, uv: vec2f, pos: vec4f) -> vec4f {
 }
 
 fn blurish(col: vec4f, uv: vec2f, pos: vec4f) -> vec4f {
-    let r = 10.0 / u_size.width;
+    let r = 14.0 / u_size.width;
     var blur = vec3f(0.0, 0.0, 0.0);
-    var count = 0.0;
+    var size = 32;
 
-    for(var i = 0; i < 16; i = i + 1) {
-        let angle = f32(i) * 6.2831853 / 16.0;
+    for(var i = 0; i < size; i = i + 1) {
+        let angle = f32(i) * 6.2831853 / f32(size);
         let d = vec2f(cos(angle), sin(angle)) * r;
         blur += textureSample(post_tex, post_sampler, uv + d).rgb *
-            step(0.4, max(max(textureSample(post_tex, post_sampler, uv + d).r, textureSample(post_tex, post_sampler, uv + d).g), textureSample(post_tex, post_sampler, uv + d).b));
-        count += 1.0;
+            step(0.4, max(max(textureSample(post_tex, post_sampler, uv + d).r,
+                textureSample(post_tex, post_sampler, uv + d).g), textureSample(post_tex, post_sampler, uv + d).b));
     }
 
-    blur /= count;
+    blur /= f32(size);
 
     let glowed = col.rgb + blur * 1.0;
     return vec4f(clamp(glowed, vec3f(0.0), vec3f(1.0)), col.a);
